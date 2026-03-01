@@ -191,9 +191,6 @@
       <button class="nav-item" onclick="showPage('clientes')">
         <span class="nav-icon">🏪</span> Clientes
       </button>
-      <button class="nav-item" onclick="showPage('solicitudes')">
-        <span class="nav-icon">📥</span> Solicitudes
-      </button>
       <button class="nav-item" onclick="showPage('nuevo')">
         <span class="nav-icon">➕</span> Nuevo Cliente
       </button>
@@ -338,17 +335,6 @@
           <button class="btn btn-red" id="btn-delete" style="display:none;margin-left:auto" onclick="deleteCliente()">🗑 Eliminar</button>
         </div>
         <div id="form-alert" style="margin-top:12px"></div>
-      </div>
-    </div>
-
-    <!-- SOLICITUDES -->
-    <div id="page-solicitudes" class="page">
-      <div class="page-header">
-        <div class="page-title">Solicitudes <span>Entrantes</span></div>
-        <button class="btn btn-ghost" onclick="loadSolicitudes()">↻ Actualizar</button>
-      </div>
-      <div class="card">
-        <div id="tabla-solicitudes"><div class="loading">Cargando...</div></div>
       </div>
     </div>
 
@@ -718,92 +704,6 @@ function logActividad(texto) {
         <div class="timeline-time">${a.tiempo}</div>
       </div>
     </li>`).join("");
-}
-
-let solicitudes = [];
-
-async function loadSolicitudes() {
-  try {
-    solicitudes = await sb.get("solicitudes");
-    renderSolicitudes();
-    // badge en dashboard
-    const pendientes = solicitudes.filter(s => s.estado === "pendiente").length;
-    document.querySelectorAll(".nav-item").forEach(n => {
-      if (n.getAttribute("onclick")?.includes("solicitudes")) {
-        n.innerHTML = `<span class="nav-icon">📥</span> Solicitudes ${pendientes > 0 ? `<span style="background:var(--red);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:auto">${pendientes}</span>` : ""}`;
-      }
-    });
-  } catch(e) { console.error(e); }
-}
-
-function renderSolicitudes() {
-  if (solicitudes.length === 0) {
-    document.getElementById("tabla-solicitudes").innerHTML = '<div class="empty">Sin solicitudes aún. Comparte tu página de solicitud.</div>';
-    return;
-  }
-  document.getElementById("tabla-solicitudes").innerHTML = `
-    <table>
-      <thead><tr>
-        <th>Negocio</th><th>Contacto</th><th>Plan</th><th>Ciudad</th><th>Mesas</th><th>Estado</th><th>Fecha</th><th>Acciones</th>
-      </tr></thead>
-      <tbody>
-        ${solicitudes.map(s => `
-          <tr>
-            <td><div style="font-weight:700">${s.nombre_negocio}</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${s.email}</div></td>
-            <td><div>${s.nombre_contacto}</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${s.telefono || "—"}</div></td>
-            <td><span class="badge badge-${s.plan_interes}">${s.plan_interes}</span></td>
-            <td style="font-size:12px">${s.ciudad || "—"}</td>
-            <td style="text-align:center">${s.num_mesas || "—"}</td>
-            <td><span class="badge badge-${s.estado === "pendiente" ? "prueba" : s.estado === "contactado" ? "estandar" : "activo"}">${s.estado}</span></td>
-            <td style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${fmtDate(s.created_at)}</td>
-            <td>
-              <div class="actions-cell">
-                ${s.telefono ? `<a href="https://wa.me/52${s.telefono.replace(/\D/g,'')}" target="_blank" class="btn btn-green btn-sm">💬 WA</a>` : ""}
-                ${s.estado === "pendiente" ? `<button class="btn btn-ghost btn-sm" onclick="marcarContactado(${s.id})">✓ Contactado</button>` : ""}
-                <button class="btn btn-gold btn-sm" onclick="convertirCliente(${s.id})">→ Crear Cliente</button>
-              </div>
-            </td>
-          </tr>`).join("")}
-      </tbody>
-    </table>`;
-}
-
-async function marcarContactado(id) {
-  await sb.update("solicitudes", id, { estado: "contactado" });
-  await loadSolicitudes();
-  showAlert("global", "success", "✅ Marcado como contactado");
-}
-
-function convertirCliente(id) {
-  const s = solicitudes.find(x => x.id === id);
-  if (!s) return;
-  // Pre-llenar el form de nuevo cliente con los datos de la solicitud
-  editingId = null;
-  document.getElementById("form-title").innerHTML = 'Nuevo <span>Cliente</span>';
-  document.getElementById("f-nombre").value = s.nombre_negocio;
-  document.getElementById("f-contacto").value = s.nombre_contacto;
-  document.getElementById("f-email").value = s.email || "";
-  document.getElementById("f-tel").value = s.telefono || "";
-  document.getElementById("f-plan").value = s.plan_interes || "estandar";
-  document.getElementById("f-estado").value = "prueba";
-  document.getElementById("f-notas").value = s.mensaje ? `Solicitud: ${s.mensaje}` : "";
-  const hoy = new Date().toISOString().split("T")[0];
-  document.getElementById("f-inicio").value = hoy;
-  const mes = new Date(); mes.setMonth(mes.getMonth() + 1);
-  document.getElementById("f-pago").value = mes.toISOString().split("T")[0];
-  document.getElementById("f-supabase").value = "";
-  document.getElementById("f-vercel").value = "";
-  document.getElementById("btn-delete").style.display = "none";
-  document.getElementById("form-alert").innerHTML = "";
-  showPage("nuevo");
-  logActividad(`Convirtiendo solicitud de ${s.nombre_negocio} a cliente`);
-}
-
-// Patch loadAll to also load solicitudes
-const _origLoadAll = loadAll;
-async function loadAll() {
-  await _origLoadAll();
-  await loadSolicitudes();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FoodRestCo — Sistema POS para Restaurantes</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #222222;
+    --gold: #e8a520;
+    --orange: #e86c1a;
+    --red: #e03416;
+    --green: #22c55e;
+    --text: #f0ede8;
+    --text2: #a09890;
+    --text3: #504840;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 48px;
+    background: rgba(10,10,10,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .nav-brand span:nth-child(1) { color: var(--red); }
+  .nav-brand span:nth-child(2) { color: var(--orange); }
+  .nav-brand span:nth-child(3) { color: var(--gold); }
+  .nav-cta { padding: 10px 22px; background: var(--gold); color: #0a0a0a; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: none; transition: opacity 0.2s; }
+  .nav-cta:hover { opacity: 0.88; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 120px 24px 80px;
+    background: radial-gradient(ellipse at 50% 0%, #1a0f00 0%, #0a0a0a 65%);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 80%, #e03416 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, #e8a520 0%, transparent 35%);
+    opacity: 0.04; pointer-events: none;
+  }
+  .hero-tag { display: inline-block; background: var(--gold)20; color: var(--gold); border: 1px solid var(--gold)40; border-radius: 20px; padding: 5px 16px; font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 0.12em; margin-bottom: 28px; }
+  .hero-title { font-size: clamp(38px, 7vw, 80px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; max-width: 800px; margin-bottom: 24px; }
+  .hero-title .accent { background: linear-gradient(135deg, var(--orange), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero-sub { font-size: clamp(15px, 2vw, 19px); color: var(--text2); max-width: 540px; line-height: 1.6; margin-bottom: 40px; }
+  .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .btn-primary { padding: 16px 36px; background: var(--gold); color: #0a0a0a; border: none; border-radius: 10px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; text-decoration: none; transition: all 0.2s; display: inline-block; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--gold)40; }
+  .btn-secondary { padding: 16px 36px; background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 10px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 16px; cursor: pointer; text-decoration: none; transition: all 0.2s; display: inline-block; }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* FEATURES */
+  .section { padding: 100px 48px; max-width: 1100px; margin: 0 auto; }
+  .section-tag { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 14px; }
+  .section-title { font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
+  .section-sub { font-size: 16px; color: var(--text2); max-width: 500px; line-height: 1.6; margin-bottom: 56px; }
+
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .feature-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .feature-card:hover { border-color: var(--gold)44; transform: translateY(-3px); }
+  .feature-icon { font-size: 32px; margin-bottom: 14px; }
+  .feature-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .feature-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* PRECIOS */
+  .pricing-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 100px 48px; }
+  .pricing-inner { max-width: 1000px; margin: 0 auto; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+  .plan-card {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 32px;
+    position: relative; transition: all 0.2s;
+  }
+  .plan-card:hover { border-color: var(--gold)44; }
+  .plan-card.featured { border-color: var(--gold); background: var(--gold)08; }
+  .plan-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #0a0a0a; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px; font-family: 'DM Mono', monospace; white-space: nowrap; }
+  .plan-name { font-size: 13px; font-family: 'DM Mono', monospace; color: var(--text3); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; }
+  .plan-price { font-size: 42px; font-weight: 800; letter-spacing: -2px; margin-bottom: 4px; }
+  .plan-price span { font-size: 16px; font-weight: 400; color: var(--text2); }
+  .plan-desc { font-size: 13px; color: var(--text2); margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .plan-features { list-style: none; margin-bottom: 28px; }
+  .plan-features li { font-size: 13px; color: var(--text2); padding: 6px 0; display: flex; gap: 8px; align-items: flex-start; }
+  .plan-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+  .plan-cta { width: 100%; padding: 13px; border-radius: 9px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; }
+  .plan-cta-featured { background: var(--gold); color: #0a0a0a; }
+  .plan-cta-featured:hover { opacity: 0.88; }
+  .plan-cta-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .plan-cta-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* FORMULARIO */
+  .form-section { padding: 100px 24px; background: radial-gradient(ellipse at 50% 100%, #1a0f00 0%, #0a0a0a 60%); }
+  .form-inner { max-width: 620px; margin: 0 auto; }
+  .form-header { text-align: center; margin-bottom: 48px; }
+  .form-box { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 40px; }
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 7px; letter-spacing: 0.12em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+  .field input, .field select, .field textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 13px 14px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; outline: none; transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--gold); }
+  .field select option { background: var(--surface2); }
+  .field textarea { resize: vertical; min-height: 90px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .btn-submit { width: 100%; padding: 16px; background: var(--gold); border: none; border-radius: 10px; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; color: #0a0a0a; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--gold)40; }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* SUCCESS */
+  #success-msg { display: none; text-align: center; padding: 48px 24px; }
+  .success-icon { font-size: 64px; margin-bottom: 20px; }
+  .success-title { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+  .success-sub { font-size: 15px; color: var(--text2); line-height: 1.6; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 32px 48px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .footer-brand { font-size: 16px; font-weight: 800; }
+  .footer-brand span:nth-child(1) { color: var(--red); }
+  .footer-brand span:nth-child(2) { color: var(--orange); }
+  .footer-brand span:nth-child(3) { color: var(--gold); }
+  .footer-text { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+  @media (max-width: 640px) {
+    nav { padding: 14px 20px; }
+    .section { padding: 70px 20px; }
+    .pricing-section { padding: 70px 20px; }
+    .field-row { grid-template-columns: 1fr; }
+    .form-box { padding: 24px 20px; }
+    footer { padding: 24px 20px; flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand"><span>Food</span><span>Rest</span><span>Co</span></div>
+  <a href="#solicitud" class="nav-cta">Solicitar Demo →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Sistema POS para Restaurantes</div>
+  <h1 class="hero-title">Tu restaurante, <br><span class="accent">sin complicaciones</span></h1>
+  <p class="hero-sub">Control total de mesas, órdenes, cocina y reportes desde cualquier dispositivo. Sin instalar nada.</p>
+  <div class="hero-btns">
+    <a href="#solicitud" class="btn-primary">Quiero una Demo Gratis</a>
+    <a href="#precios" class="btn-secondary">Ver Planes</a>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<div style="max-width:1100px;margin:0 auto">
+<section class="section">
+  <div class="section-tag">Funcionalidades</div>
+  <h2 class="section-title">Todo lo que necesitas,<br>nada que no uses</h2>
+  <p class="section-sub">Diseñado para restaurantes mexicanos. Funciona en celular, tablet y computadora.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🪑</div>
+      <div class="feature-title">Control de Mesas</div>
+      <div class="feature-desc">Ve el estado de todas tus mesas en tiempo real. Asigna meseros y abre órdenes con un toque.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🍳</div>
+      <div class="feature-title">Tickets a Cocina</div>
+      <div class="feature-desc">Los pedidos llegan automáticamente a cocina y barra. Sin gritos, sin errores, sin papel perdido.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👥</div>
+      <div class="feature-title">Roles y Permisos</div>
+      <div class="feature-desc">Meseros, cajeros y administradores con accesos diferenciados. Cada quien ve solo lo que necesita.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💰</div>
+      <div class="feature-title">Cobro y Dividir Cuenta</div>
+      <div class="feature-desc">Efectivo, tarjeta o transferencia. Divide la cuenta entre comensales con un solo clic.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Reportes y Cortes</div>
+      <div class="feature-desc">Corte X y Z, ventas por mesero, por producto y por forma de pago. Exporta a Excel cuando quieras.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <div class="feature-title">Control de Devoluciones</div>
+      <div class="feature-desc">Registro completo de productos devueltos con quién los autorizó. Trazabilidad total.</div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- PRECIOS -->
+<section class="pricing-section" id="precios">
+  <div class="pricing-inner">
+    <div style="text-align:center;margin-bottom:56px">
+      <div class="section-tag" style="margin-bottom:14px">Planes</div>
+      <h2 class="section-title">Precio justo,<br>sin sorpresas</h2>
+      <p style="color:var(--text2);font-size:15px">Sin contratos anuales. Cancela cuando quieras.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- BÁSICO -->
+      <div class="plan-card">
+        <div class="plan-name">Básico</div>
+        <div class="plan-price">$299 <span>/mes</span></div>
+        <div class="plan-desc">Para restaurantes pequeños que están empezando.</div>
+        <ul class="plan-features">
+          <li>Hasta 10 mesas</li>
+          <li>Hasta 3 usuarios</li>
+          <li>Órdenes y cobros</li>
+          <li>Reportes básicos</li>
+          <li>Soporte por WhatsApp</li>
+        </ul>
+        <button class="plan-cta plan-cta-ghost" onclick="selectPlan('basico')">Solicitar →</button>
+      </div>
+
+      <!-- ESTÁNDAR -->
+      <div class="plan-card featured">
+        <div class="plan-badge">⭐ Más Popular</div>
+        <div class="plan-name">Estándar</div>
+        <div class="plan-price">$699 <span>/mes</span></div>
+        <div class="plan-desc">La solución completa para restaurantes en crecimiento.</div>
+        <ul class="plan-features">
+          <li>Mesas ilimitadas</li>
+          <li>Usuarios ilimitados</li>
+          <li>Tickets a cocina y barra</li>
+          <li>Corte X y Z</li>
+          <li>Devoluciones con registro</li>
+          <li>Exportación a Excel</li>
+          <li>Soporte prioritario</li>
+        </ul>
+        <button class="plan-cta plan-cta-featured" onclick="selectPlan('estandar')">Solicitar →</button>
+      </div>
+
+      <!-- PREMIUM -->
+      <div class="plan-card">
+        <div class="plan-name">Premium</div>
+        <div class="plan-price">$1,499 <span>/mes</span></div>
+        <div class="plan-desc">Para cadenas y restaurantes con necesidades especiales.</div>
+        <ul class="plan-features">
+          <li>Todo lo del Estándar</li>
+          <li>Capacitación presencial</li>
+          <li>Configuración inicial incluida</li>
+          <li>Soporte telefónico directo</li>
+          <li>Integraciones a la medida</li>
+          <li>SLA garantizado</li>
+        </ul>
+        <button class="plan-cta plan-cta-ghost" onclick="selectPlan('premium')">Solicitar →</button>
+      </div>
+
+    </div>
+    <p style="text-align:center;margin-top:28px;font-size:13px;color:var(--text3);font-family:'DM Mono',monospace">
+      Todos los planes incluyen 14 días de prueba gratis · Sin tarjeta de crédito
+    </p>
+  </div>
+</section>
+
+<!-- FORMULARIO -->
+<section class="form-section" id="solicitud">
+  <div class="form-inner">
+    <div class="form-header">
+      <div class="section-tag">Contacto</div>
+      <h2 class="section-title">Empieza hoy gratis</h2>
+      <p style="color:var(--text2);font-size:15px;line-height:1.6">Llena el formulario y te contactamos en menos de 24 horas para agendar tu demo.</p>
+    </div>
+
+    <div class="form-box">
+      <div id="form-content">
+        <div class="field-row">
+          <div class="field">
+            <label>Nombre del Restaurante *</label>
+            <input type="text" id="f-negocio" placeholder="Ej: Tacos El Güero" />
+          </div>
+          <div class="field">
+            <label>Tu Nombre *</label>
+            <input type="text" id="f-contacto" placeholder="Ej: Juan Pérez" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Email *</label>
+            <input type="email" id="f-email" placeholder="correo@ejemplo.com" />
+          </div>
+          <div class="field">
+            <label>Teléfono / WhatsApp</label>
+            <input type="tel" id="f-tel" placeholder="81 1234 5678" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Ciudad</label>
+            <input type="text" id="f-ciudad" placeholder="Ej: Monterrey, NL" />
+          </div>
+          <div class="field">
+            <label>¿Cuántas mesas tienes?</label>
+            <input type="number" id="f-mesas" placeholder="Ej: 15" min="1" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Plan de Interés</label>
+          <select id="f-plan">
+            <option value="basico">Básico — $299/mes</option>
+            <option value="estandar" selected>Estándar — $699/mes (Más Popular)</option>
+            <option value="premium">Premium — $1,499/mes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>¿Algo que quieras contarnos? (opcional)</label>
+          <textarea id="f-mensaje" placeholder="Cuéntanos sobre tu restaurante, horarios, necesidades especiales..."></textarea>
+        </div>
+        <div id="form-error" style="color:var(--red);font-size:13px;font-family:'DM Mono',monospace;margin-bottom:12px;display:none"></div>
+        <button class="btn-submit" id="btn-submit" onclick="enviarSolicitud()">
+          Quiero mi Demo Gratis →
+        </button>
+        <p style="text-align:center;font-size:12px;color:var(--text3);margin-top:14px;font-family:'DM Mono',monospace">
+          Sin spam. Te contactamos solo para agendar tu demo.
+        </p>
+      </div>
+
+      <div id="success-msg">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">¡Solicitud enviada!</div>
+        <div class="success-sub">Recibimos tu información. Te contactaremos en las próximas <strong>24 horas</strong> para agendar tu demo personalizada.<br><br>Mientras tanto, si tienes urgencia escríbenos directo por WhatsApp.</div>
+        <a href="https://wa.me/521TUNUMERO" target="_blank" style="display:inline-block;margin-top:24px;padding:13px 28px;background:var(--green);color:#fff;border-radius:9px;font-weight:700;text-decoration:none;font-size:15px">
+          📱 Escribir por WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand"><span>Food</span><span>Rest</span><span>Co</span></div>
+  <div class="footer-text">Sistema POS para Restaurantes · México 🇲🇽</div>
+  <div class="footer-text">© 2025 FoodRestCo. Todos los derechos reservados.</div>
+</footer>
+
+<script>
+const SUPABASE_URL = "https://wikaxikjscsxaqewggpb.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indpa2F4aWtqc2NzeGFxZXdnZ3BiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMzQ5NDgsImV4cCI6MjA4NzkxMDk0OH0.rr93Rq9KEABJ998kCHYhDZBvAW-6_0ngSlMknVA5kY8";
+
+function selectPlan(plan) {
+  document.getElementById("f-plan").value = plan;
+  document.getElementById("solicitud").scrollIntoView({ behavior: "smooth" });
+}
+
+async function enviarSolicitud() {
+  const negocio  = document.getElementById("f-negocio").value.trim();
+  const contacto = document.getElementById("f-contacto").value.trim();
+  const email    = document.getElementById("f-email").value.trim();
+  const errEl    = document.getElementById("form-error");
+
+  if (!negocio || !contacto || !email) {
+    errEl.textContent = "⚠ Por favor llena los campos obligatorios (*)";
+    errEl.style.display = "block";
+    return;
+  }
+  errEl.style.display = "none";
+
+  const btn = document.getElementById("btn-submit");
+  btn.disabled = true;
+  btn.textContent = "Enviando...";
+
+  try {
+    const data = {
+      nombre_negocio:  negocio,
+      nombre_contacto: contacto,
+      email,
+      telefono: document.getElementById("f-tel").value.trim(),
+      ciudad:   document.getElementById("f-ciudad").value.trim(),
+      num_mesas: parseInt(document.getElementById("f-mesas").value) || null,
+      plan_interes: document.getElementById("f-plan").value,
+      mensaje:  document.getElementById("f-mensaje").value.trim(),
+      estado:   "pendiente",
+    };
+
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/solicitudes`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: "Bearer " + SUPABASE_KEY,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal"
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!r.ok) throw new Error(await r.text());
+
+    document.getElementById("form-content").style.display = "none";
+    document.getElementById("success-msg").style.display = "block";
+
+  } catch(e) {
+    errEl.textContent = "Error al enviar. Intenta de nuevo o escríbenos por WhatsApp.";
+    errEl.style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "Quiero mi Demo Gratis →";
+  }
+}
+</script>
+</body>
+</html>
