@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FoodRestCo — Panel de Administración</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #222222;
+    --gold: #e8a520;
+    --orange: #e86c1a;
+    --red: #e03416;
+    --green: #22c55e;
+    --blue: #3b82f6;
+    --text: #f0ede8;
+    --text2: #a09890;
+    --text3: #504840;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  
+  /* LOGIN */
+  #login-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at 30% 50%, #1a1200 0%, #0a0a0a 60%);
+  }
+  .login-box {
+    width: 100%; max-width: 380px; padding: 48px 40px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  }
+  .brand { text-align: center; margin-bottom: 36px; }
+  .brand-name { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+  .brand-name span:nth-child(1) { color: var(--red); }
+  .brand-name span:nth-child(2) { color: var(--orange); }
+  .brand-name span:nth-child(3) { color: var(--gold); }
+  .brand-sub { font-size: 10px; color: var(--text3); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px; font-family: 'DM Mono', monospace; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 6px; letter-spacing: 0.1em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+  .field input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; outline: none; transition: border-color 0.2s; }
+  .field input:focus { border-color: var(--gold); }
+  .btn-login { width: 100%; padding: 14px; background: var(--gold); border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #0a0a0a; cursor: pointer; margin-top: 8px; transition: opacity 0.2s; }
+  .btn-login:hover { opacity: 0.9; }
+  .login-error { color: var(--red); font-size: 12px; margin-top: 10px; text-align: center; font-family: 'DM Mono', monospace; }
+
+  /* LAYOUT */
+  #app { display: none; }
+  .sidebar {
+    position: fixed; top: 0; left: 0; width: 220px; height: 100vh;
+    background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; z-index: 100;
+  }
+  .sidebar-brand { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+  .sidebar-brand .brand-name { font-size: 18px; }
+  .sidebar-brand .badge { display: inline-block; background: var(--gold)22; color: var(--gold); border: 1px solid var(--gold)44; border-radius: 4px; font-size: 9px; padding: 2px 6px; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; margin-top: 4px; }
+  .nav { padding: 12px 10px; flex: 1; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text2); transition: all 0.15s; margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--gold)15; color: var(--gold); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-footer { padding: 14px; border-top: 1px solid var(--border); }
+  .sidebar-user { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+  .btn-logout { width: 100%; padding: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text2); font-family: 'Syne', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+  .main { margin-left: 220px; padding: 32px; min-height: 100vh; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* COMPONENTES */
+  .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+  .page-title { font-size: 26px; font-weight: 800; }
+  .page-title span { color: var(--gold); }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .stat-label { font-size: 10px; color: var(--text3); letter-spacing: 0.15em; text-transform: uppercase; font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+  .stat-value { font-size: 32px; font-weight: 800; line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 6px; font-family: 'DM Mono', monospace; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 16px; color: var(--text2); letter-spacing: 0.05em; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 8px 12px; font-size: 10px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; font-family: 'DM Mono', monospace; font-weight: 500; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 12px; font-size: 13px; border-bottom: 1px solid var(--border)88; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2)88; }
+
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; font-family: 'DM Mono', monospace; }
+  .badge-activo { background: var(--green)20; color: var(--green); border: 1px solid var(--green)40; }
+  .badge-suspendido { background: var(--red)20; color: var(--red); border: 1px solid var(--red)40; }
+  .badge-prueba { background: var(--gold)20; color: var(--gold); border: 1px solid var(--gold)40; }
+  .badge-basico { background: var(--text3)30; color: var(--text2); border: 1px solid var(--border); }
+  .badge-estandar { background: var(--blue)20; color: var(--blue); border: 1px solid var(--blue)40; }
+  .badge-premium { background: var(--gold)20; color: var(--gold); border: 1px solid var(--gold)40; }
+
+  .btn { padding: 8px 16px; border-radius: 7px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-gold { background: var(--gold); color: #0a0a0a; }
+  .btn-gold:hover { opacity: 0.88; }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-red { background: var(--red)20; color: var(--red); border: 1px solid var(--red)40; }
+  .btn-red:hover { background: var(--red)35; }
+  .btn-green { background: var(--green)20; color: var(--green); border: 1px solid var(--green)40; }
+  .btn-green:hover { background: var(--green)35; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; transform: translateY(20px); transition: transform 0.2s; }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; }
+  .modal-field { margin-bottom: 14px; }
+  .modal-field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 5px; letter-spacing: 0.1em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+  .modal-field input, .modal-field select, .modal-field textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px;
+    padding: 10px 12px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; outline: none; transition: border-color 0.2s;
+  }
+  .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { border-color: var(--gold); }
+  .modal-field select option { background: var(--surface2); }
+  .modal-field textarea { resize: vertical; min-height: 70px; }
+  .modal-row { display: flex; gap: 10px; }
+  .modal-row .modal-field { flex: 1; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+  .loading { text-align: center; padding: 60px; color: var(--text3); font-family: 'DM Mono', monospace; }
+  .empty { text-align: center; padding: 50px; color: var(--text3); font-family: 'DM Mono', monospace; font-size: 13px; }
+
+  /* Acción rápida row */
+  .actions-cell { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* Alerta */
+  .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; font-family: 'DM Mono', monospace; }
+  .alert-success { background: var(--green)15; border: 1px solid var(--green)40; color: var(--green); }
+  .alert-error { background: var(--red)15; border: 1px solid var(--red)40; color: var(--red); }
+
+  /* Timeline / actividad */
+  .timeline { list-style: none; }
+  .timeline-item { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border)66; }
+  .timeline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; margin-top: 5px; }
+  .timeline-content { flex: 1; }
+  .timeline-text { font-size: 13px; }
+  .timeline-time { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+  @media (max-width: 768px) {
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .main { margin-left: 0; padding: 16px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="brand">
+      <div class="brand-name"><span>Food</span><span>Rest</span><span>Co</span></div>
+      <div class="brand-sub">Panel de Administración SaaS</div>
+    </div>
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="login-user" placeholder="admin" />
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <button class="btn-login" onclick="doLogin()">Iniciar Sesión</button>
+    <div id="login-error" class="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-name"><span>Food</span><span>Rest</span><span>Co</span></div>
+      <div class="badge">ADMIN PANEL</div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" onclick="showPage('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-item" onclick="showPage('clientes')">
+        <span class="nav-icon">🏪</span> Clientes
+      </button>
+      <button class="nav-item" onclick="showPage('nuevo')">
+        <span class="nav-icon">➕</span> Nuevo Cliente
+      </button>
+      <button class="nav-item" onclick="showPage('actividad')">
+        <span class="nav-icon">📋</span> Actividad
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="sidebar-username">admin</div>
+      <button class="btn-logout" onclick="doLogout()">← Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div id="global-alert" style="display:none"></div>
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header">
+        <div class="page-title">Dashboard <span>General</span></div>
+        <button class="btn btn-ghost" onclick="loadAll()">↻ Actualizar</button>
+      </div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total Clientes</div><div class="stat-value" id="stat-total">—</div></div>
+        <div class="stat-card"><div class="stat-label">Activos</div><div class="stat-value" style="color:var(--green)" id="stat-activos">—</div></div>
+        <div class="stat-card"><div class="stat-label">En Prueba</div><div class="stat-value" style="color:var(--gold)" id="stat-prueba">—</div></div>
+        <div class="stat-card"><div class="stat-label">Suspendidos</div><div class="stat-value" style="color:var(--red)" id="stat-suspendidos">—</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <!-- Clientes recientes -->
+        <div class="card">
+          <div class="card-title">🏪 Clientes Recientes</div>
+          <div id="recent-clientes"><div class="loading">Cargando...</div></div>
+        </div>
+        <!-- Por vencer -->
+        <div class="card">
+          <div class="card-title">⚠️ Pagos por Vencer (próx. 7 días)</div>
+          <div id="por-vencer"><div class="loading">Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- Distribución por plan -->
+      <div class="card">
+        <div class="card-title">📦 Distribución por Plan</div>
+        <div id="plan-dist" style="display:flex;gap:20px;flex-wrap:wrap;padding-top:4px"></div>
+      </div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div id="page-clientes" class="page">
+      <div class="page-header">
+        <div class="page-title">Clientes <span>Registrados</span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="search-input" placeholder="🔍 Buscar cliente..." oninput="renderTabla()" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none;width:200px" />
+          <select id="filter-estado" onchange="renderTabla()" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none">
+            <option value="">Todos los estados</option>
+            <option value="activo">Activos</option>
+            <option value="prueba">En prueba</option>
+            <option value="suspendido">Suspendidos</option>
+          </select>
+          <button class="btn btn-gold" onclick="showPage('nuevo')">+ Nuevo Cliente</button>
+        </div>
+      </div>
+      <div class="card">
+        <div id="tabla-clientes"><div class="loading">Cargando...</div></div>
+      </div>
+    </div>
+
+    <!-- NUEVO / EDITAR CLIENTE -->
+    <div id="page-nuevo" class="page">
+      <div class="page-header">
+        <div class="page-title" id="form-title">Nuevo <span>Cliente</span></div>
+      </div>
+      <div class="card" style="max-width:600px">
+        <div class="modal-row">
+          <div class="modal-field">
+            <label>Nombre del Negocio *</label>
+            <input type="text" id="f-nombre" placeholder="Ej: Tacos El Güero" />
+          </div>
+          <div class="modal-field">
+            <label>Nombre del Contacto *</label>
+            <input type="text" id="f-contacto" placeholder="Ej: Juan Pérez" />
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label>Email</label>
+            <input type="email" id="f-email" placeholder="correo@ejemplo.com" />
+          </div>
+          <div class="modal-field">
+            <label>Teléfono</label>
+            <input type="tel" id="f-tel" placeholder="81 1234 5678" />
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label>Plan</label>
+            <select id="f-plan">
+              <option value="basico">Básico — $299/mes</option>
+              <option value="estandar" selected>Estándar — $699/mes</option>
+              <option value="premium">Premium — $1,499/mes</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label>Estado</label>
+            <select id="f-estado">
+              <option value="prueba">En Prueba</option>
+              <option value="activo">Activo</option>
+              <option value="suspendido">Suspendido</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label>Fecha de Inicio</label>
+            <input type="date" id="f-inicio" />
+          </div>
+          <div class="modal-field">
+            <label>Próximo Pago</label>
+            <input type="date" id="f-pago" />
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label>URL Supabase del cliente</label>
+            <input type="text" id="f-supabase" placeholder="https://xxx.supabase.co" />
+          </div>
+          <div class="modal-field">
+            <label>URL Vercel del cliente</label>
+            <input type="text" id="f-vercel" placeholder="https://xxx.vercel.app" />
+          </div>
+        </div>
+        <div class="modal-field">
+          <label>Notas internas</label>
+          <textarea id="f-notas" placeholder="Notas sobre el cliente, acuerdos especiales, etc."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-gold" onclick="saveCliente()" id="btn-save">✓ Guardar Cliente</button>
+          <button class="btn btn-ghost" onclick="resetForm();showPage('clientes')">Cancelar</button>
+          <button class="btn btn-red" id="btn-delete" style="display:none;margin-left:auto" onclick="deleteCliente()">🗑 Eliminar</button>
+        </div>
+        <div id="form-alert" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <!-- ACTIVIDAD -->
+    <div id="page-actividad" class="page">
+      <div class="page-header">
+        <div class="page-title">Registro de <span>Actividad</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Últimas acciones</div>
+        <ul class="timeline" id="timeline-list">
+          <li style="color:var(--text3);font-family:'DM Mono',monospace;font-size:12px;padding:20px 0">Sin actividad registrada aún.</li>
+        </ul>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL DETALLE -->
+<div class="modal-overlay" id="modal-detalle">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div class="modal-title" id="modal-nombre">—</div>
+      <button onclick="closeModal()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px">×</button>
+    </div>
+    <div id="modal-body"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+// IMPORTANTE: Cambia estas credenciales por las de TU Supabase personal (no el del restaurante)
+const SUPABASE_URL = "https://wikaxikjscsxaqewggpb.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indpa2F4aWtqc2NzeGFxZXdnZ3BiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMzQ5NDgsImV4cCI6MjA4NzkxMDk0OH0.rr93Rq9KEABJ998kCHYhDZBvAW-6_0ngSlMknVA5kY8";
+
+// Credenciales del panel (cámbialas)
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "foodrestco2024";
+
+// ── ESTADO ────────────────────────────────────────────────────────────────────
+let clientes = [];
+let editingId = null;
+let actividad = [];
+
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
+const sb = {
+  async get(table, filter = "") {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*${filter}&order=created_at.desc`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY }
+    });
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  },
+  async insert(table, data) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY, "Content-Type": "application/json", Prefer: "return=representation" },
+      body: JSON.stringify(data)
+    });
+    if (!r.ok) throw new Error(await r.text());
+    const res = await r.json();
+    return Array.isArray(res) ? res[0] : res;
+  },
+  async update(table, id, data) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY, "Content-Type": "application/json", Prefer: "return=representation" },
+      body: JSON.stringify(data)
+    });
+    if (!r.ok) throw new Error(await r.text());
+    const res = await r.json();
+    return Array.isArray(res) ? res[0] : res;
+  },
+  async delete(table, id) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+      method: "DELETE",
+      headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY }
+    });
+    if (!r.ok) throw new Error(await r.text());
+  }
+};
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function doLogin() {
+  const u = document.getElementById("login-user").value.trim();
+  const p = document.getElementById("login-pass").value;
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("sidebar-username").textContent = u;
+    loadAll();
+  } else {
+    document.getElementById("login-error").textContent = "⚠ Usuario o contraseña incorrectos";
+  }
+}
+function doLogout() {
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("login-user").value = "";
+  document.getElementById("login-pass").value = "";
+}
+
+// ── NAVEGACIÓN ────────────────────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById("page-" + id).classList.add("active");
+  document.querySelectorAll(".nav-item").forEach(n => {
+    if (n.getAttribute("onclick")?.includes(`'${id}'`)) n.classList.add("active");
+  });
+  if (id === "clientes") renderTabla();
+  if (id === "dashboard") renderDashboard();
+  if (id === "nuevo" && !editingId) resetForm();
+}
+
+// ── DATOS ─────────────────────────────────────────────────────────────────────
+async function loadAll() {
+  try {
+    clientes = await sb.get("clientes");
+    renderDashboard();
+    renderTabla();
+  } catch(e) {
+    showAlert("global", "error", "Error conectando a Supabase. Verifica las credenciales en el código.");
+  }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const total = clientes.length;
+  const activos = clientes.filter(c => c.estado === "activo").length;
+  const prueba = clientes.filter(c => c.estado === "prueba").length;
+  const suspendidos = clientes.filter(c => c.estado === "suspendido").length;
+
+  document.getElementById("stat-total").textContent = total;
+  document.getElementById("stat-activos").textContent = activos;
+  document.getElementById("stat-prueba").textContent = prueba;
+  document.getElementById("stat-suspendidos").textContent = suspendidos;
+
+  // Recientes
+  const recientes = clientes.slice(0, 5);
+  document.getElementById("recent-clientes").innerHTML = recientes.length === 0
+    ? '<div class="empty">Sin clientes aún</div>'
+    : recientes.map(c => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)66">
+        <div>
+          <div style="font-size:13px;font-weight:600">${c.nombre_negocio}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${c.nombre_contacto}</div>
+        </div>
+        <span class="badge badge-${c.estado}">${c.estado}</span>
+      </div>`).join("");
+
+  // Por vencer
+  const hoy = new Date();
+  const en7 = new Date(hoy); en7.setDate(en7.getDate() + 7);
+  const porVencer = clientes.filter(c => {
+    if (!c.fecha_pago || c.estado !== "activo") return false;
+    const fp = new Date(c.fecha_pago);
+    return fp >= hoy && fp <= en7;
+  });
+  document.getElementById("por-vencer").innerHTML = porVencer.length === 0
+    ? '<div class="empty">✅ Sin pagos próximos a vencer</div>'
+    : porVencer.map(c => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)66">
+        <div>
+          <div style="font-size:13px;font-weight:600">${c.nombre_negocio}</div>
+          <div style="font-size:11px;color:var(--gold);font-family:'DM Mono',monospace">Vence: ${fmtDate(c.fecha_pago)}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="quickSuspend(${c.id})">Suspender</button>
+      </div>`).join("");
+
+  // Distribución por plan
+  const planes = { basico: 0, estandar: 0, premium: 0 };
+  clientes.forEach(c => { if (planes[c.plan] !== undefined) planes[c.plan]++; });
+  const planColors = { basico: "var(--text2)", estandar: "var(--blue)", premium: "var(--gold)" };
+  const planLabels = { basico: "Básico $299", estandar: "Estándar $699", premium: "Premium $1,499" };
+  document.getElementById("plan-dist").innerHTML = Object.entries(planes).map(([plan, count]) => `
+    <div style="flex:1;min-width:120px;background:var(--surface2);border-radius:10px;padding:16px;border:1px solid var(--border)">
+      <div style="font-size:24px;font-weight:800;color:${planColors[plan]}">${count}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:'DM Mono',monospace">${planLabels[plan]}</div>
+    </div>`).join("");
+}
+
+// ── TABLA CLIENTES ────────────────────────────────────────────────────────────
+function renderTabla() {
+  const search = (document.getElementById("search-input")?.value || "").toLowerCase();
+  const filtroEstado = document.getElementById("filter-estado")?.value || "";
+  let filtrados = clientes.filter(c => {
+    const matchSearch = !search || c.nombre_negocio?.toLowerCase().includes(search) || c.nombre_contacto?.toLowerCase().includes(search) || c.email?.toLowerCase().includes(search);
+    const matchEstado = !filtroEstado || c.estado === filtroEstado;
+    return matchSearch && matchEstado;
+  });
+
+  if (filtrados.length === 0) {
+    document.getElementById("tabla-clientes").innerHTML = '<div class="empty">Sin clientes que coincidan</div>';
+    return;
+  }
+
+  document.getElementById("tabla-clientes").innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Negocio</th><th>Contacto</th><th>Plan</th><th>Estado</th><th>Próx. Pago</th><th>URL</th><th>Acciones</th>
+      </tr></thead>
+      <tbody>
+        ${filtrados.map(c => `
+          <tr>
+            <td><div style="font-weight:700">${c.nombre_negocio}</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${c.email || "—"}</div></td>
+            <td><div>${c.nombre_contacto}</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${c.telefono || "—"}</div></td>
+            <td><span class="badge badge-${c.plan}">${c.plan}</span></td>
+            <td><span class="badge badge-${c.estado}">${c.estado}</span></td>
+            <td style="font-family:'DM Mono',monospace;font-size:12px;color:${isPastDue(c.fecha_pago) ? "var(--red)" : "var(--text2)"}">${c.fecha_pago ? fmtDate(c.fecha_pago) : "—"}</td>
+            <td>${c.vercel_url ? `<a href="${c.vercel_url}" target="_blank" style="color:var(--gold);font-family:'DM Mono',monospace;font-size:11px">↗ Ver app</a>` : "—"}</td>
+            <td>
+              <div class="actions-cell">
+                <button class="btn btn-ghost btn-sm" onclick="editCliente(${c.id})">✏ Editar</button>
+                ${c.estado !== "suspendido"
+                  ? `<button class="btn btn-red btn-sm" onclick="quickSuspend(${c.id})">⏸ Suspender</button>`
+                  : `<button class="btn btn-green btn-sm" onclick="quickActivar(${c.id})">▶ Activar</button>`
+                }
+              </div>
+            </td>
+          </tr>`).join("")}
+      </tbody>
+    </table>`;
+}
+
+// ── CRUD ──────────────────────────────────────────────────────────────────────
+function resetForm() {
+  editingId = null;
+  document.getElementById("form-title").innerHTML = 'Nuevo <span>Cliente</span>';
+  document.getElementById("btn-save").textContent = "✓ Guardar Cliente";
+  document.getElementById("btn-delete").style.display = "none";
+  ["f-nombre","f-contacto","f-email","f-tel","f-supabase","f-vercel","f-notas"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("f-plan").value = "estandar";
+  document.getElementById("f-estado").value = "prueba";
+  const hoy = new Date().toISOString().split("T")[0];
+  document.getElementById("f-inicio").value = hoy;
+  const mes = new Date(); mes.setMonth(mes.getMonth() + 1);
+  document.getElementById("f-pago").value = mes.toISOString().split("T")[0];
+  document.getElementById("form-alert").innerHTML = "";
+}
+
+function editCliente(id) {
+  const c = clientes.find(x => x.id === id);
+  if (!c) return;
+  editingId = id;
+  document.getElementById("form-title").innerHTML = `Editar <span>${c.nombre_negocio}</span>`;
+  document.getElementById("btn-save").textContent = "✓ Actualizar Cliente";
+  document.getElementById("btn-delete").style.display = "block";
+  document.getElementById("f-nombre").value = c.nombre_negocio || "";
+  document.getElementById("f-contacto").value = c.nombre_contacto || "";
+  document.getElementById("f-email").value = c.email || "";
+  document.getElementById("f-tel").value = c.telefono || "";
+  document.getElementById("f-plan").value = c.plan || "estandar";
+  document.getElementById("f-estado").value = c.estado || "activo";
+  document.getElementById("f-inicio").value = c.fecha_inicio || "";
+  document.getElementById("f-pago").value = c.fecha_pago || "";
+  document.getElementById("f-supabase").value = c.supabase_url || "";
+  document.getElementById("f-vercel").value = c.vercel_url || "";
+  document.getElementById("f-notas").value = c.notas || "";
+  document.getElementById("form-alert").innerHTML = "";
+  showPage("nuevo");
+}
+
+async function saveCliente() {
+  const nombre = document.getElementById("f-nombre").value.trim();
+  const contacto = document.getElementById("f-contacto").value.trim();
+  if (!nombre || !contacto) {
+    showAlert("form", "error", "⚠ Nombre del negocio y contacto son obligatorios");
+    return;
+  }
+  const data = {
+    nombre_negocio: nombre, nombre_contacto: contacto,
+    email: document.getElementById("f-email").value.trim(),
+    telefono: document.getElementById("f-tel").value.trim(),
+    plan: document.getElementById("f-plan").value,
+    estado: document.getElementById("f-estado").value,
+    fecha_inicio: document.getElementById("f-inicio").value || null,
+    fecha_pago: document.getElementById("f-pago").value || null,
+    supabase_url: document.getElementById("f-supabase").value.trim(),
+    vercel_url: document.getElementById("f-vercel").value.trim(),
+    notas: document.getElementById("f-notas").value.trim(),
+  };
+  try {
+    if (editingId) {
+      await sb.update("clientes", editingId, data);
+      logActividad(`Editado: ${nombre} → Plan ${data.plan}, Estado ${data.estado}`);
+    } else {
+      await sb.insert("clientes", data);
+      logActividad(`Nuevo cliente: ${nombre} (${data.plan})`);
+    }
+    await loadAll();
+    resetForm();
+    showPage("clientes");
+    showAlert("global", "success", `✅ Cliente "${nombre}" ${editingId ? "actualizado" : "creado"} correctamente`);
+    editingId = null;
+  } catch(e) {
+    showAlert("form", "error", "Error al guardar: " + e.message);
+  }
+}
+
+async function deleteCliente() {
+  if (!editingId) return;
+  const c = clientes.find(x => x.id === editingId);
+  if (!confirm(`¿Eliminar a "${c?.nombre_negocio}"? Esta acción no se puede deshacer.`)) return;
+  try {
+    await sb.delete("clientes", editingId);
+    logActividad(`Eliminado: ${c?.nombre_negocio}`);
+    await loadAll();
+    resetForm();
+    showPage("clientes");
+    showAlert("global", "success", `Cliente eliminado.`);
+  } catch(e) {
+    showAlert("form", "error", "Error al eliminar: " + e.message);
+  }
+}
+
+async function quickSuspend(id) {
+  const c = clientes.find(x => x.id === id);
+  if (!c) return;
+  if (!confirm(`¿Suspender a "${c.nombre_negocio}"?`)) return;
+  await sb.update("clientes", id, { estado: "suspendido" });
+  logActividad(`Suspendido: ${c.nombre_negocio}`);
+  await loadAll();
+  showAlert("global", "success", `⏸ "${c.nombre_negocio}" suspendido.`);
+}
+
+async function quickActivar(id) {
+  const c = clientes.find(x => x.id === id);
+  if (!c) return;
+  await sb.update("clientes", id, { estado: "activo" });
+  logActividad(`Reactivado: ${c.nombre_negocio}`);
+  await loadAll();
+  showAlert("global", "success", `▶ "${c.nombre_negocio}" reactivado.`);
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function closeModal() {
+  document.getElementById("modal-detalle").classList.remove("open");
+}
+
+// ── UTILIDADES ────────────────────────────────────────────────────────────────
+function fmtDate(d) {
+  if (!d) return "—";
+  return new Date(d + "T12:00:00").toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" });
+}
+function isPastDue(fecha) {
+  if (!fecha) return false;
+  return new Date(fecha) < new Date();
+}
+function showAlert(scope, type, msg) {
+  const id = scope === "global" ? "global-alert" : "form-alert";
+  const el = document.getElementById(id);
+  el.style.display = "block";
+  el.innerHTML = `<div class="alert alert-${type === "success" ? "success" : "error"}">${msg}</div>`;
+  if (scope === "global") setTimeout(() => { el.style.display = "none"; }, 4000);
+}
+function logActividad(texto) {
+  actividad.unshift({ texto, tiempo: new Date().toLocaleString("es-MX") });
+  const list = document.getElementById("timeline-list");
+  list.innerHTML = actividad.map(a => `
+    <li class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-text">${a.texto}</div>
+        <div class="timeline-time">${a.tiempo}</div>
+      </div>
+    </li>`).join("");
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.getElementById("login-pass").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+</script>
+</body>
+</html>
