@@ -472,6 +472,7 @@ async function loadAll() {
     clientes = await sb.get("clientes");
     renderDashboard();
     renderTabla();
+    await loadSolicitudes();
   } catch(e) {
     showAlert("global", "error", "Error conectando a Supabase. Verifica las credenciales en el código.");
   }
@@ -797,13 +798,6 @@ function convertirCliente(id) {
   document.getElementById("form-alert").innerHTML = "";
   showPage("nuevo");
   logActividad(`Convirtiendo solicitud de ${s.nombre_negocio} a cliente`);
-}
-
-// Patch loadAll to also load solicitudes
-const _origLoadAll = loadAll;
-async function loadAll() {
-  await _origLoadAll();
-  await loadSolicitudes();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
